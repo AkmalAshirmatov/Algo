@@ -1,0 +1,55 @@
+struct SuffArray {
+    int n;
+    vector<vector<int> > classes;
+    vector<int> cnt, p, pn, cn, c, rank;
+    string str;
+
+    SuffArray(string s = "") : n(s.length()), p(n), cnt(max(256, n)), c(n), pn(n), cn(n), rank(n), str(s) {}
+
+    vector<int> Build_Suff() {
+        char mn = '~';
+        for (int i = 0; i < n; i++)
+            mn = min(mn, str[i]);
+
+        for (int i = 0; i < n; i++){
+            c[i] = cn[i] = str[i] - mn + 1;
+            p[i] = pn[i] = i;
+        }
+        for (int step = 1; step <= 2 * n; step *= 2){
+            fill(cnt.begin(), cnt.end(), 0);
+            for (int i = 0; i < n; i++) ++cnt[c[pn[i]]];
+            for (int i = 1; i < max(n, 256); i++) cnt[i] += cnt[i - 1];
+            for (int i = n - 1; i >= 0; i--)
+                p[--cnt[c[pn[i]]]] = pn[i];
+            cn[p[0]] = 0;
+            for (int i = 1; i < n; i++){
+                int mid1 = (p[i] + step / 2) % n;
+                int mid2 = (p[i - 1] + step / 2) % n;
+                cn[p[i]] = cn[p[i - 1]];
+                if (c[p[i]] != c[p[i - 1]] || c[mid1] != c[mid2]) cn[p[i]]++;
+            }
+            classes.pb(cn);
+            swap(c, cn);
+           for (int i = 0; i < n; i++)
+               pn[i] = (p[i] + n - step) % n;
+
+
+        }
+        for (int i = 0; i < n; i++) rank[p[i]] = i;
+        return p;
+    }
+    int Get_Lcp(int i, int j){
+        if (i == j) return n - i - 1;
+        int ans = 0;
+
+        for (int step = classes.size() - 1; step >= 0; step--) {
+            if (classes[step][i] == classes[step][j]) {
+                i = (i + (1 << step)) % n;
+                j = (j + (1 << step)) % n;
+                ans += (1 << step);
+            }
+        }
+        return min(ans, n);
+        return min(ans, n);
+    }
+} st1_array;
